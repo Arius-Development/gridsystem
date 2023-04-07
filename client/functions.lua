@@ -85,10 +85,10 @@ CheckMarkerJob = function (marker)
     table.insert(MarkerWithJob[marker.permission], marker)
 end
 
-HasJob = function (jobName, jobGrade)
-    if not jobName then return true end
+HasJob = function (marker)
+    if not marker.permission then return true end
     while CurrentJob == nil do Wait(100) end
-    return (CurrentJob.name == jobName and CurrentJob.grade >= jobGrade)
+    return (CurrentJob.name == marker.permission and CurrentJob.grade >= marker.jobGrade)
 end
 
 RemoveAllJobMarkers = function ()
@@ -97,9 +97,6 @@ RemoveAllJobMarkers = function ()
             local isRegistered, chunkId, index = IsMarkerAlreadyRegistered(v[i].name)
             if isRegistered then
                 LogInfo("Removing Job Marker: " .. v[i].name)
-                if RegisteredMarkers[chunkId][index].blip then
-                    RemoveBlip(RegisteredMarkers[chunkId][index].blip)
-                end
                 RegisteredMarkers[chunkId][index] = nil
             end
         end
@@ -109,7 +106,7 @@ end
 AddJobMarkers = function ()
     if MarkerWithJob[CurrentJob.name] then
         for i = 1, #MarkerWithJob[CurrentJob.name] do
-            if HasJob(MarkerWithJob[CurrentJob.name][i].permission, MarkerWithJob[CurrentJob.name][i].jobGrade) then
+            if HasJob(MarkerWithJob[CurrentJob.name][i]) then
                 InsertMarkerIntoGrid(MarkerWithJob[CurrentJob.name][i])
             end
         end
@@ -139,42 +136,29 @@ GetMarkersFromResource = function (resource)
     return temp
 end
 
-GetBlipsFromResource = function(resource)
-    local temp = {}
-    for k,v in pairs(RegisteredBlips) do
-        if v.resource == resource then
-            temp[#temp + 1] = v
-        end
-    end
-    return temp
-end
 
-RefreshBlips = function()
-    for k,v in pairs(RegisteredBlips) do
-        if v.permission then
-            if HasJob(v.permission, v.jobGrade) then
-                if not RegisteredBlips[k].handle then
-                    RegisteredBlips[k] = ParseBlip(RegisteredBlips[k])
-                end
-            else
-                if RegisteredBlips[k].handle then
-                    RemoveBlip(RegisteredBlips[k].handle)
-                    RegisteredBlips[k].handle = nil
-                end
+function caricaMarker(dict, timeout)
+    if HasStreamedTextureDictLoaded(dict) then return dict end
+
+    if type(dict) ~= 'string' then
+        return print(("errore aspettato una stringa per texture marker (ricevuto %s)"):format(type(dict)))
+    end
+
+    RequestStreamedTextureDict(dict, false)
+
+    if coroutine.running() then
+        timeout = tonumber(timeout) or 500
+
+        for _ = 1, timeout do
+            if HasStreamedTextureDictLoaded(dict) then
+                return dict
             end
-        end
-    end
-end
 
-RegisterBlip = function(blip, invoker)
-    if RegisteredBlips[blip.name] then
-        if not HasJob(RegisteredBlips[blip.name].permission, RegisteredBlips[blip.name].jobGrade) then
-            RemoveBlip(RegisteredBlips[blip.name].handle)
-            RegisteredBlips[blip.name].handle = nil
+            Wait(0)
         end
-    else
-        if HasJob(blip.permission, blip.jobGrade) then
-            RegisteredBlips[blip.name] = ParseBlip(blip, invoker)
-        end
+
+        return print(("Marker non caricato '%s' dopo %s tick"):format(dict, timeout))
     end
+
+    return dict
 end
