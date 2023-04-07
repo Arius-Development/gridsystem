@@ -1,4 +1,6 @@
 # Gridsystem
+[+] Aggiunto possibilità di usare marker custom
+
 Marker handling resource for FiveM
 
 This resource make it easy to handle markers in one single resource. Markers are registered within "chunks" and all the maths is done based on the chunk the player is in.
