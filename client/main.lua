@@ -69,7 +69,7 @@ CreateThread(function ()
 
                         local dict = caricaMarker("marker", 10)
 
-                        DrawMarker(9, zone.pos, 0.0, 0.0, 0.0, 90.0, 0.0, 0.0, zone.scale.x, zone.scale.y, zone.scale.z, zone.color.r, zone.color.g, zone.color.b, 200, zone.bump, zone.faceCamera, 2, zone.rotate, dict, zone.texture or "default", false)
+                        DrawMarker(9, zone.pos, 0.0, 0.0, 0.0, 90.0, 0.0, 0.0, zone.scale.x, zone.scale.y, zone.scale.z, zone.color.r, zone.color.g, zone.color.b, 200, zone.bump or false, zone.faceCamera or false, 2, zone.rotate or false, dict, zone.texture or "default", false)
                     end
                 end
                 
